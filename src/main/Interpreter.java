@@ -33,137 +33,6 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
     private Environment environment = globals;
     private boolean hasDisplay = false;
 
-    Interpreter() {
-        globals.define("clock", new CodeCallable() {
-            @Override
-            public int arity() {
-                return 0;
-            }
-
-            @Override
-            public Object call(Interpreter interpreter, List<Object> arguments) {
-                return (double) System.currentTimeMillis() / 1000.0;
-            }
-
-            @Override
-            public String toString() {
-                return "<native fn>";
-            }
-        });
-
-        globals.define("ceil", new CodeCallable() {
-
-            @Override
-            public int arity() {
-                return 1;
-            }
-
-            @Override
-            public Object call(Interpreter interpreter, List<Object> arguments) {
-                return Math.ceil((double) arguments.get(0));
-            }
-
-            @Override
-            public String toString() {
-                return "<native fn>";
-            }
-        });
-
-        globals.define("floor", new CodeCallable() {
-
-            @Override
-            public int arity() {
-                return 1;
-            }
-
-            @Override
-            public Object call(Interpreter interpreter, List<Object> arguments) {
-                return Math.floor((double) arguments.get(0));
-            }
-
-            @Override
-            public String toString() {
-                return "<native fn>";
-            }
-        });
-
-        globals.define("sqrt", new CodeCallable() {
-
-            @Override
-            public int arity() {
-                return 1;
-            }
-
-            @Override
-            public Object call(Interpreter interpreter, List<Object> arguments) {
-                return Math.sqrt((double) arguments.get(0));
-            }
-
-            @Override
-            public String toString() {
-                return "<native fn>";
-            }
-        });
-
-        globals.define("abs", new CodeCallable() {
-
-            @Override
-            public int arity() {
-                return 1;
-            }
-
-            @Override
-            public Object call(Interpreter interpreter, List<Object> arguments) {
-                return Math.abs((double) arguments.get(0));
-            }
-
-            @Override
-            public String toString() {
-                return "<native fn>";
-            }
-        });
-
-        globals.define("pow", new CodeCallable() {
-
-            @Override
-            public int arity() {
-                return 2;
-            }
-
-            @Override
-            public Object call(Interpreter interpreter, List<Object> arguments) {
-                return Math.pow((double) arguments.get(0), (double) arguments.get(1));
-            }
-
-            @Override
-            public String toString() {
-                return "<native fn>";
-            }
-        });
-
-        globals.define("scanString", new CodeCallable() {
-
-            @Override
-            public int arity() {
-                return 1;
-            }
-
-            @Override
-            public Object call(Interpreter interpreter, List<Object> arguments) {
-                Scanner scanner = new Scanner(System.in);
-                System.out.println(arguments.get(0));
-                String input = scanner.nextLine();
-                scanner.close();
-                return input;
-            }
-
-            @Override
-            public String toString() {
-                return "<native fn>";
-            }
-        });
-    }
-
     void interpret(List<Stmt> statements) {
         try {
             for (Stmt statement : statements) {
@@ -282,6 +151,11 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
     }
 
     @Override
+    public Object visitCallExpr(Call expr) {
+        return null;
+    }
+
+    @Override
     public Object visitGroupingExpr(Grouping expr) {
         return evaluate(expr.expression);
     }
@@ -380,6 +254,11 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
     }
 
     @Override
+    public Object visitFunctionStmt(Function stmt) {
+        return null;
+    }
+
+    @Override
     public Void visitPrintStmt(Print stmt) {
         Object value = evaluate(stmt.expression);
         if (value instanceof Boolean) {
@@ -387,23 +266,6 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
         } else {
             System.out.print(value.toString());
         }
-        return null;
-    }
-
-    @Override
-    public Object visitStringStmt(Stmt.String stmt) {
-        Object value = null;
-        if (stmt.initializer != null) {
-            value = evaluate(stmt.initializer);
-            if (!(value instanceof String)) {
-                Object v = value;
-                if (value instanceof Boolean) {
-                    v = value.toString().toUpperCase();
-                }
-                throw new RuntimeError(stmt.name, "Value '" + v + "' is not of type String.");
-            }
-        }
-        environment.define(stmt.name.lexeme, value, TokenType.STRING, stmt.mutable);
         return null;
     }
 
@@ -561,13 +423,6 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
     }
 
     @Override
-    public Object visitFunctionStmt(Function stmt) {
-        CodeFunction function = new CodeFunction(stmt);
-        environment.define(stmt.name.lexeme, function);
-        return null;
-    }
-
-    @Override
     public Object visitScanStmt(Scan stmt) {
         @SuppressWarnings("resource")
         Scanner scanner = new java.util.Scanner(System.in);
@@ -624,28 +479,6 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
         }
         return null;
 
-    }
-
-    @Override
-    public Object visitCallExpr(Call expr) {
-        Object callee = evaluate(expr.callee);
-
-        List<Object> arguments = new ArrayList<>();
-        for (Expr argument : expr.arguments) {
-            arguments.add(evaluate(argument));
-        }
-
-        if (!(callee instanceof CodeCallable)) {
-            throw new RuntimeError(expr.paren, "Can only call functions and classes.");
-        }
-
-        CodeCallable function = (CodeCallable) callee;
-        if (arguments.size() != function.arity()) {
-            throw new RuntimeError(expr.paren,
-                    "Expected " + function.arity() + " arguments but got " + arguments.size() + ".");
-        }
-
-        return function.call(this, arguments);
     }
 
     @Override

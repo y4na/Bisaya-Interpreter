@@ -20,8 +20,6 @@ abstract class Stmt {
 
         R visitWhileStmt(While stmt);
 
-        R visitStringStmt(String stmt);
-
         R visitIntStmt(Int stmt);
 
         R visitFloatStmt(Float stmt);
@@ -155,23 +153,6 @@ abstract class Stmt {
 
         final Expr condition;
         final List<Stmt> body;
-    }
-
-    static class String extends Stmt {
-        String(Token name, Expr initializer, boolean mutable) {
-            this.name = name;
-            this.initializer = initializer;
-            this.mutable = mutable;
-        }
-
-        @Override
-        <R> R accept(Visitor<R> visitor) {
-            return visitor.visitStringStmt(this);
-        }
-
-        final Token name;
-        final Expr initializer;
-        final boolean mutable;
     }
 
     static class Int extends Stmt {

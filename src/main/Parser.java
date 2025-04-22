@@ -248,6 +248,12 @@ public class Parser {
 
     }
 
+    private Stmt declaration() {
+        if (match(TokenType.DECLARATION)) return (Stmt) varDeclaration();
+        throw error(peek(), "Expected declaration.");
+    }
+
+
     private List<Stmt> varDeclaration() {
         Token immut = previous();
         Token token = previous();
@@ -255,22 +261,18 @@ public class Parser {
         List<Token> names = new ArrayList<>();
         List<Expr> initializers = new ArrayList<>();
 
-        if (immut.type == TokenType.IMMUTABLE) {
+        if (immut.type == TokenType.IMMUTABLE || immut.type == TokenType.DECLARATION) {
             mutable = false;
-            token = consume(peek().type, "Expecting a variable type after 'IMMUT' keyword.");
+            token = consume(peek().type, "Expecting a variable type after IMMUTABLE or MUGNA.");
         }
 
         do {
             Token name = consume(TokenType.IDENTIFIER, "Expect variable name.");
             names.add(name);
             Expr initializer = null;
+
             if (match(TokenType.EQUAL)) {
                 initializer = expression();
-                // if (!isValidType(token.type)) {
-                // throw error(name,
-                // "Type mismatch: " + getLiteralType(tokens.get(current - 1).type)
-                // + " cannot be converted to " + token.type);
-                // }
             }
 
             initializers.add(initializer);
@@ -279,12 +281,6 @@ public class Parser {
         List<Stmt> statements = new ArrayList<>();
 
         switch (token.type) {
-            case STRING:
-                for (int i = 0; i < names.size(); i++) {
-                    Stmt statement = new Stmt.String(names.get(i), initializers.get(i), mutable);
-                    statements.add(statement);
-                }
-                break;
             case CHAR:
                 for (int i = 0; i < names.size(); i++) {
                     Stmt statement = new Stmt.Char(names.get(i), initializers.get(i), mutable);
@@ -312,6 +308,7 @@ public class Parser {
         }
         return statements;
     }
+
 
     private Stmt expressionStatement() {
         Expr expr = expression();

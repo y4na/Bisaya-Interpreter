@@ -15,30 +15,27 @@ public class Scanner {
 
     static {
         keywords = new HashMap<>();
-        keywords.put("SUGOD", TokenType.BEGIN);          // BEGIN
-        keywords.put("KATAPUSAN", TokenType.END);        // END
-        keywords.put("IPAKITA", TokenType.DISPLAY);      // DISPLAY
-        keywords.put("DAWAT", TokenType.SCAN);           // SCAN
-        keywords.put("WALA", TokenType.NULL);            // null stays the same (or define 'WALA'?)
-        keywords.put("SINULAT", TokenType.STRING);       // if you want STRING, can be changed to 'SINULAT' or similar
-        keywords.put("LETRA", TokenType.CHAR);           // CHAR
-        keywords.put("NUMERO", TokenType.INT);           // INT
-        keywords.put("TIPIK", TokenType.FLOAT);          // FLOAT
-        keywords.put("TINUOD", TokenType.BOOL);          // BOOL
-        keywords.put("KUNG", TokenType.IF);              // IF
-        keywords.put("KUNG WALA", TokenType.ELSE);       // ELSE (special handling needed in parser)
-        keywords.put("KUNG DILI", TokenType.ELSE_IF); // For else-if like structure, may need custom TokenType
-        keywords.put("ALANG SA", TokenType.FOR);        // WHILE (if applicable)
-        keywords.put("UG", TokenType.AND);               // AND
-        keywords.put("O", TokenType.OR);                 // OR
-        keywords.put("DILI", TokenType.NOT);             // NOT / also FALSE (context-based tokenization)
-        keywords.put("BUHAT", TokenType.FUNCTION);       // FN => BUHAT
-        keywords.put("DI-MAUSAB", TokenType.IMMUTABLE);  // IMMUTABLE => DI-MAUSAB (if used)
-        keywords.put("BALIK", TokenType.RETURN);         // RETURN => BALIK
-        keywords.put("MUGNA", TokenType.DECLARATION);    // CODE block or variable declaration
-        keywords.put("PUNDOK", TokenType.BLOCK);         // used to denote blocks like { ... }
+        keywords.put("SUGOD", TokenType.BEGIN);
+        keywords.put("KATAPUSAN", TokenType.END);
+        keywords.put("IPAKITA", TokenType.DISPLAY);
+        keywords.put("DAWAT", TokenType.SCAN);
+        keywords.put("LETRA", TokenType.CHAR);
+        keywords.put("NUMERO", TokenType.INT);
+        keywords.put("TIPIK", TokenType.FLOAT);
+        keywords.put("TINUOD", TokenType.BOOL);
+        keywords.put("KUNG", TokenType.IF);
+        keywords.put("KUNG WALA", TokenType.ELSE);
+        keywords.put("KUNG DILI", TokenType.ELSE_IF);
+        keywords.put("ALANG SA", TokenType.FOR);
+        keywords.put("UG", TokenType.AND);
+        keywords.put("O", TokenType.OR);
+        keywords.put("DILI", TokenType.NOT);
+        keywords.put("MUGNA", TokenType.DECLARATION);
+        keywords.put("PUNDOK", TokenType.BLOCK);
         keywords.put("OO", TokenType.TRUE_LITERAL);
         keywords.put("DILI", TokenType.FALSE_LITERAL);
+
+        keywords.put("WALA", TokenType.NULL); // not included
     }
 
 
