@@ -299,4 +299,3 @@ public class Scanner {
         addToken(type);
     }
 }
-

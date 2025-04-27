@@ -3,8 +3,6 @@ package main;
 import java.util.ArrayList;
 import java.util.List;
 
-import main.Stmt.Function;
-
 public class Parser {
 
     private static class ParseError extends RuntimeException {
@@ -20,27 +18,18 @@ public class Parser {
 
     List<Stmt> parse() {
         List<Stmt> statements = new ArrayList<>();
-        while (match(TokenType.FUNCTION) && !isAtEnd()) {
-            statements.add(function("function"));
-        }
 
         consume(TokenType.BEGIN, "Expecting SUGOD.");
 
         while (match(TokenType.STRING, TokenType.CHAR, TokenType.INT, TokenType.FLOAT, TokenType.BOOL,
-                TokenType.IMMUTABLE, TokenType.RETURN)) {
-            if (previous().type == TokenType.RETURN) {
-                throw error(previous(), "Return statement should only be inside a function.");
-            }
+                TokenType.DECLARATION)) {
             statements.addAll(varDeclaration());
         }
+
         while (!isAtEnd() && !check(TokenType.END)) {
             if (check(TokenType.STRING) || check(TokenType.CHAR) || check(TokenType.INT) || check(TokenType.FLOAT)
-                    || check(TokenType.BOOL) || check(TokenType.IMMUTABLE)) {
+                    || check(TokenType.BOOL) || check(TokenType.DECLARATION)) {
                 afterVarDeclaration = true;
-            }
-
-            if (check(TokenType.RETURN)) {
-                throw error(peek(), "Return statement should only be inside a function.");
             }
             statements.add(statement());
         }
@@ -51,15 +40,10 @@ public class Parser {
             if (peek().type == TokenType.BEGIN) {
                 throw error(peek(),
                         "Expecting only one pair of SUGOD and KATAPUSAN blocks");
-            } else if (peek().type == TokenType.FUNCTION) {
-                throw error(peek(),
-                        "Function must be declared at the topmost part before SUGOD.");
-
             } else {
                 throw error(peek(),
                         "All statements must be inside SUGOD and KATAPUSAN.");
             }
-
         }
 
         return statements;
@@ -121,13 +105,11 @@ public class Parser {
             return scanStatement();
         }
 
-        if (match(TokenType.RETURN)) {
-            return returnStatement();
-        }
-
         if (match(TokenType.IF)) {
             return ifStatement();
-        } else if (match(TokenType.WHILE)) {
+        }
+
+        if (match(TokenType.WHILE)) {
             return whileStatement();
         }
 
@@ -137,17 +119,6 @@ public class Parser {
     private Stmt displayStatement() {
         Expr value = or();
         return new Stmt.Print(value);
-    }
-
-    private Stmt returnStatement() {
-        Token keyword = previous();
-        Expr value = null;
-
-        if (!check(TokenType.END)) {
-            value = expression();
-        }
-
-        return new Stmt.Return(keyword, value);
     }
 
     private Stmt scanStatement() {
@@ -166,22 +137,17 @@ public class Parser {
         consume(TokenType.RIGHT_PARENTHESIS, "Expecting ')' after an expression");
 
         consume(TokenType.BLOCK, "Expecting a PUNDOK after Condition.");
-//        consume(TokenType.IF, "Expecting '{' after PUNDOK");
 
         List<Stmt> thenBranch = new ArrayList<>();
         while (!isAtEnd() && !check(TokenType.END)) {
             if (check(TokenType.STRING) || check(TokenType.CHAR) || check(TokenType.INT) || check(TokenType.FLOAT)
-                    || check(TokenType.BOOL) || check(TokenType.IMMUTABLE)) {
+                    || check(TokenType.BOOL) || check(TokenType.DECLARATION)) { // Changed IMMUTABLE to DECLARATION
                 afterVarDeclaration = true;
             }
             thenBranch.add(statement());
         }
 
-//        consume(TokenType.END, "Expecting END after a statement.");
-//        consume(TokenType.IF, "Expecting IF after END");
-
         List<Expr> elseIfConditions = new ArrayList<>();
-
         List<List<Stmt>> elseIfBranches = new ArrayList<>();
 
         while (peek().type == TokenType.ELSE && peekNext().type == TokenType.IF && !isAtEnd()) {
@@ -217,11 +183,9 @@ public class Parser {
 
             consume(TokenType.END, "Expecting END after a statement.");
             consume(TokenType.IF, "Expecting IF after END");
-
         }
 
         return new Stmt.If(condition, thenBranch, elseIfConditions, elseIfBranches, elseBranch);
-
     }
 
     private Stmt whileStatement() {
@@ -230,12 +194,12 @@ public class Parser {
         consume(TokenType.RIGHT_PARENTHESIS, "Expecting ')' after an expression");
 
         consume(TokenType.BEGIN, "Expecting a BEGIN after Condition.");
-        consume(TokenType.WHILE, "Expecting an WHILE after BEGIN");
+        consume(TokenType.WHILE, "Expecting a WHILE after BEGIN");
 
         List<Stmt> body = new ArrayList<>();
         while (!isAtEnd() && !check(TokenType.END)) {
             if (check(TokenType.STRING) || check(TokenType.CHAR) || check(TokenType.INT) || check(TokenType.FLOAT)
-                    || check(TokenType.BOOL) || check(TokenType.IMMUTABLE)) {
+                    || check(TokenType.BOOL) || check(TokenType.DECLARATION)) { // Changed IMMUTABLE to DECLARATION
                 afterVarDeclaration = true;
             }
             body.add(statement());
@@ -245,25 +209,19 @@ public class Parser {
         consume(TokenType.WHILE, "Expecting WHILE after END");
 
         return new Stmt.While(condition, body);
-
     }
-
-    private Stmt declaration() {
-        if (match(TokenType.DECLARATION)) return (Stmt) varDeclaration();
-        throw error(peek(), "Expected declaration.");
-    }
-
 
     private List<Stmt> varDeclaration() {
-        Token immut = previous();
+        Token declaration = previous();
         Token token = previous();
         boolean mutable = true;
         List<Token> names = new ArrayList<>();
         List<Expr> initializers = new ArrayList<>();
 
-        if (immut.type == TokenType.IMMUTABLE || immut.type == TokenType.DECLARATION) {
-            mutable = false;
-            token = consume(peek().type, "Expecting a variable type after IMMUTABLE or MUGNA.");
+        if (declaration.type == TokenType.DECLARATION) { // Check for "MUGNA"
+            token = consume(peek().type, "Expecting a variable type after MUGNA (DECLARATION).");
+        } else {
+            error(declaration, "Expecting keyword MUGNA before variable declaration.");
         }
 
         do {
@@ -283,104 +241,32 @@ public class Parser {
         switch (token.type) {
             case CHAR:
                 for (int i = 0; i < names.size(); i++) {
-                    Stmt statement = new Stmt.Char(names.get(i), initializers.get(i), mutable);
-                    statements.add(statement);
+                    statements.add(new Stmt.Char(names.get(i), initializers.get(i), mutable));
                 }
                 break;
             case INT:
                 for (int i = 0; i < names.size(); i++) {
-                    Stmt statement = new Stmt.Int(names.get(i), initializers.get(i), mutable);
-                    statements.add(statement);
+                    statements.add(new Stmt.Int(names.get(i), initializers.get(i), mutable));
                 }
                 break;
             case FLOAT:
                 for (int i = 0; i < names.size(); i++) {
-                    Stmt statement = new Stmt.Float(names.get(i), initializers.get(i), mutable);
-                    statements.add(statement);
+                    statements.add(new Stmt.Float(names.get(i), initializers.get(i), mutable));
                 }
                 break;
             default:
                 for (int i = 0; i < names.size(); i++) {
-                    Stmt statement = new Stmt.Bool(names.get(i), initializers.get(i), mutable);
-                    statements.add(statement);
+                    statements.add(new Stmt.Bool(names.get(i), initializers.get(i), mutable));
                 }
                 break;
         }
+
         return statements;
     }
-
 
     private Stmt expressionStatement() {
         Expr expr = expression();
         return new Stmt.Expression(expr);
-    }
-
-    private Function function(String kind) {
-        Token returnType = null;
-        if (match(TokenType.STRING, TokenType.CHAR, TokenType.INT, TokenType.FLOAT, TokenType.BOOL)) {
-            returnType = previous();
-        }
-
-        Token name = consume(TokenType.IDENTIFIER, "Expect " + kind + " name.");
-        consume(TokenType.LEFT_PARENTHESIS, "Expect '(' after " + kind + " name.");
-        List<Parameter> parameters = new ArrayList<>();
-
-        if (!check(TokenType.RIGHT_PARENTHESIS)) {
-            do {
-                if (parameters.size() >= 255) {
-                    error(peek(), "Can't have more than 255 parameters.");
-                }
-
-                Token type = advance();
-                Token paramName = advance();
-                parameters.add(new Parameter(type, paramName));
-
-            } while (match(TokenType.COMMA));
-        }
-
-        consume(TokenType.RIGHT_PARENTHESIS, "Expect ')' after parameters.");
-
-        consume(TokenType.BEGIN, "Expect 'BEGIN' before 'FN'.");
-        consume(TokenType.FUNCTION, "Expect 'FN' before " + kind + " body.");
-
-        List<Stmt> body = block(TokenType.FUNCTION, returnType);
-        return new Stmt.Function(name, parameters, body, returnType);
-    }
-
-    private List<Stmt> block(TokenType type, Token returnType) {
-        boolean hasReturn = false;
-        List<Stmt> statements = new ArrayList<>();
-
-        while (match(TokenType.STRING, TokenType.CHAR, TokenType.INT, TokenType.FLOAT, TokenType.BOOL,
-                TokenType.IMMUTABLE)) {
-            statements.addAll(varDeclaration());
-        }
-
-        while (!isAtEnd() && !check(TokenType.END)) {
-            if (check(TokenType.RETURN)) {
-                statements.add(statement());
-                hasReturn = true;
-                break;
-            } else {
-                statements.add(statement());
-            }
-        }
-
-        String message = "Expect 'END' after function body.";
-        if (hasReturn) {
-            message = "Expecting 'END' after return statement";
-        }
-
-        if (!hasReturn && returnType != null) {
-            throw error(returnType, "Function declared with return type but has no return statement.");
-        }
-
-        consume(TokenType.END, message);
-        if (peek().type == type) {
-            consume(peek().type, "Expecting 'FN' after END");
-        }
-
-        return statements;
     }
 
     private Expr equality() {
@@ -455,13 +341,11 @@ public class Parser {
                 if (arguments.size() >= 255) {
                     error(peek(), "Can't have more than 255 arguments");
                 }
-                Expr expr = expression();
-                arguments.add(expr);
+                arguments.add(expression());
             } while (match(TokenType.COMMA));
         }
 
         Token rightParen = consume(TokenType.RIGHT_PARENTHESIS, "Expecting a parenthesis after a function call.");
-
         return new Expr.Call(callee, rightParen, arguments);
     }
 
@@ -501,28 +385,6 @@ public class Parser {
     private ParseError error(Token token, String message) {
         Main.error(token, message);
         return new ParseError();
-    }
-
-    @SuppressWarnings("unused")
-    private void synchronize() {
-        advance();
-
-        while (!isAtEnd()) {
-            if (previous().type == TokenType.SEMICOLON)
-                return;
-            switch (peek().type) {
-                case STRING:
-                case INT:
-                case CHAR:
-                case BOOL:
-                case DISPLAY:
-                case SCAN:
-                    return;
-                default:
-                    break;
-            }
-            advance();
-        }
     }
 
     private Token previous() {

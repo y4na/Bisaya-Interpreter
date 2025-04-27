@@ -21,7 +21,6 @@ import main.Stmt.Function;
 import main.Stmt.If;
 import main.Stmt.Int;
 import main.Stmt.Print;
-import main.Stmt.Return;
 import main.Stmt.Scan;
 import main.Stmt.While;
 import java.util.Scanner;
@@ -481,12 +480,4 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
 
     }
 
-    @Override
-    public Object visitReturnStmt(Return stmt) {
-        Object value = null;
-        if (stmt.value != null)
-            value = evaluate(stmt.value);
-
-        throw new main.Return(value, stmt.keyword);
-    }
 }

@@ -1,6 +1,8 @@
 SUGOD
-NUMERO base, taas, area
-DAWAT: base, taas
-area = (base * taas) / 2
-IPAKITA: "Area: " & area
+MUGNA NUMERO x, y, z=5
+MUGNA LETRA a_1='n'
+MUGNA TINUOD t="OO"
+x = y = 4
+a_1='c'
+IPAKITA: x & t & z & $ & a_1 & [#] & "last"
 KATAPUSAN
