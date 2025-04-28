@@ -16,11 +16,20 @@ public class Environment {
     }
 
     void define(String name, Object value, TokenType type, boolean isImmutable) {
-        if (!values.containsKey(name)) {
-            values.put(name, new Variable(type, value, isImmutable));
-        } else {
-            throw new RuntimeError(new Token(type, name, type, 0), "Variable " + name + " is already defined.");
+        if (values.containsKey(name)) {
+            throw new RuntimeError(new Token(type, name, type, 0),
+                    "Variable '" + name + "' is already defined in this scope.");
         }
+
+        Environment current = this.enclosing;
+        while (current != null) {
+            if (current.values.containsKey(name)) {
+                throw new RuntimeError(new Token(type, name, type, 0),
+                        "Variable '" + name + "' shadows variable from an outer scope.");
+            }
+            current = current.enclosing;
+        }
+        values.put(name, new Variable(type, value, isImmutable));
     }
 
     void define(String name, Object value) {

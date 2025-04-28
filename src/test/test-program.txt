@@ -30,7 +30,7 @@ IPAKITA: "Grade = " & grade & $
 IPAKITA: "Is Adult? = " & isAdult
 KATAPUSAN
 
-////////////////////////
+// # 2
 
 SUGOD
 MUGNA NUMERO student_num

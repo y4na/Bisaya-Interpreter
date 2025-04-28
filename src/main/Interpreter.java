@@ -31,7 +31,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
     private Environment environment = globals;
     private boolean hasDisplay = false;
 
-    void interpret(List<Stmt> statements) {
+    public void interpret(List<Stmt> statements) {
         try {
             for (Stmt statement : statements) {
                 execute(statement);
@@ -39,10 +39,15 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
             if (!hasDisplay) {
                 System.out.println("No Error.");
             }
-        } catch (RuntimeError e) {
-            Main.runtimeError(e);
+        } catch (RuntimeError error) {
+            System.err.println("[Runtime Error] " + error.getMessage());
+            Main.runtimeError(error); // Optional: if you still want Main to handle something special
+        } catch (Exception e) {
+            System.err.println("An unexpected error occurred:");
+            e.printStackTrace();
         }
     }
+
 
 
     @Override
@@ -151,8 +156,9 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
 
     @Override
     public Object visitCallExpr(Call expr) {
-        return null;
+        throw new RuntimeError(expr.paren, "Unknown function or command."); // E009
     }
+
 
     @Override
     public Object visitGroupingExpr(Grouping expr) {
@@ -209,14 +215,11 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
         try {
             this.environment = environment;
             for (Stmt statement : statements) {
-                // You might want to reconsider setting hasDisplay globally here
-                // if executeBlock is used in places where display isn't the primary output.
-                // Or reset it before calling executeBlock if needed.
-                // if (statement instanceof Stmt.Print) {
-                //    hasDisplay = true;
-                // }
                 execute(statement);
             }
+        } catch (RuntimeError error) {
+            System.err.println("[Runtime Error in block] " + error.getMessage());
+
         } finally {
             this.environment = previous;
         }
@@ -360,12 +363,22 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
 
     @Override
     public Object visitIfStmt(If stmt) {
-        if (isTruthy(evaluate(stmt.condition))) {
+        Object condition = evaluate(stmt.condition);
+
+        if (!(condition instanceof Boolean)) {
+            throw new RuntimeError(null, "Condition must be a Boolean.");
+        }
+
+        if (isTruthy(condition)) {
             executeBlock(stmt.thenBranch, new Environment(environment));
         } else {
             boolean executedElseIf = false;
             for (int i = 0; i < stmt.elseIfBranches.size(); i++) {
-                if (isTruthy(evaluate(stmt.elseIfConditions.get(i)))) {
+                Object elseIfCondition = evaluate(stmt.elseIfConditions.get(i));
+                if (!(elseIfCondition instanceof Boolean)) {
+                    throw new RuntimeError(null, "Condition must be a Boolean.");
+                }
+                if (isTruthy(elseIfCondition)) {
                     executeBlock(stmt.elseIfBranches.get(i), new Environment(environment));
                     executedElseIf = true;
                     break;
@@ -400,7 +413,15 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
             execute(stmt.initializer);
         }
 
-        while (isTruthy(evaluate(stmt.condition))) {
+        while (true) {
+            Object condition = evaluate(stmt.condition);
+
+            if (!(condition instanceof Boolean)) {
+                throw new RuntimeError(null, "Condition must be a Boolean."); // E006
+            }
+
+            if (!isTruthy(condition)) break;
+
             executeBlock(stmt.body, new Environment(environment));
 
             if (stmt.increment != null) {
@@ -410,6 +431,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
 
         return null;
     }
+
 
     @Override
     public Object visitScanStmt(Scan stmt) {

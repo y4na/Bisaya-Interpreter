@@ -46,3 +46,70 @@ IPAKITA: "Outside loop temp: " & temp
 
 KATAPUSAN
 
+SUGOD
+MUGNA NUMERO x = 5
+MUGNA NUMERO x = 10  -- ERROR: x is already declared
+KATAPUSAN
+
+SUGOD
+MUGNA NUMERO x = 5
+x = "Hello"  -- ERROR: Cannot assign String to NUMERO
+KATAPUSAN
+
+SUGOD
+x = 10  -- ERROR: x is not declared
+KATAPUSAN
+
+
+SUGOD
+MUGNA NUMERO a = 10
+MUGNA NUMERO b = 0
+MUGNA NUMERO result = a / b  -- ERROR: Cannot divide by zero
+KATAPUSAN
+
+
+SUGOD
+MUGNA NUMERO x = 5
+KUNG (x) PUNDOK  -- ERROR: Condition must be Boolean
+{
+    IPAKITA: "Hello"
+}
+KATAPUSAN
+
+
+SUGOD
+MUGNA NUMERO x = 10
+-- Forgot to close with KATAPUSAN
+
+
+SUGOD
+ALANG SA (i = 0, i < 10 i++)  -- ERROR: Missing comma
+PUNDOK{
+    IPAKITA: i
+}
+KATAPUSAN
+
+SUGOD
+BULALA("Hello")  -- ERROR: No function BULALA defined
+KATAPUSAN
+
+
+SUGOD
+MUGNA NUMERO a = 5
+MUGNA LETRA b = 'c'
+MUGNA NUMERO result = a + b  -- ERROR: Cannot add NUMERO and LETRA
+KATAPUSAN
+
+
+SUGOD
+MUGNA LETRA letter = "abc"  -- ERROR: LETRA must be 1 character only
+KATAPUSAN
+
+
+SUGOD
+MUGNA NUMERO x =
+-- ERROR: Missing expression after '='
+KATAPUSAN
+
+
+
