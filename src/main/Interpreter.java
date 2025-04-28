@@ -251,17 +251,23 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
         return null;
     }
 
+    // changes the TRUE/FALSE TO OO/DILI upon printing and displaying
+    private String stringify(Object value) {
+        if (value == null) return "null";
 
+        if (value instanceof Boolean) {
+            return (Boolean) value ? "OO" : "DILI";
+        }
+
+        return value.toString();
+    }
     @Override
     public Void visitPrintStmt(Print stmt) {
         Object value = evaluate(stmt.expression);
-        if (value instanceof Boolean) {
-            System.out.print(value.toString().toUpperCase());
-        } else {
-            System.out.print(value.toString());
-        }
+        System.out.print(stringify(value));
         return null;
     }
+
 
     @Override
     public Object visitIntStmt(Int stmt) {

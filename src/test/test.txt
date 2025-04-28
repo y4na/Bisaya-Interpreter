@@ -1,6 +1,5 @@
--- comment
 SUGOD
-MUGNA TEST xyz, abc=100
-xyz= ((abc *5)/10 + 10) * -1
-IPAKITA: [[] & xyz & []] -- this is a comment
+    MUGNA TINUOD p, q
+    DAWAT: p, q
+    IPAKITA: p UG DILI q
 KATAPUSAN
