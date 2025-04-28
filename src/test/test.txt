@@ -1,5 +1,8 @@
 SUGOD
-    MUGNA TINUOD p, q
-    DAWAT: p, q
-    IPAKITA: p UG DILI q
+MUGNA NUMERO x, y, z=5
+MUGNA LETRA a_1='n'
+MUGNA TINUOD t="OO"
+x=y=4
+a_1='c'
+IPAKITA: x & t & z & $ & a_1 & [#] & "last"
 KATAPUSAN

@@ -120,13 +120,16 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
                 }
                 break;
             case AMPERSAND:
-                String leftValue = (left != null) ? left.toString() : "";
-                String rightValue = (right != null) ? right.toString() : "";
+                String leftValue = "";
+                String rightValue = "";
 
-                if (left instanceof Boolean)
-                    leftValue = left.toString().toUpperCase();
-                if (right instanceof Boolean)
-                    rightValue = right.toString().toUpperCase();
+                if (left != null) {
+                    leftValue = stringify(left);
+                }
+
+                if (right != null) {
+                    rightValue = stringify(right);
+                }
 
                 return leftValue + rightValue;
 
