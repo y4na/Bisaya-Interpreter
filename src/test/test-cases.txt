@@ -9,20 +9,51 @@ KATAPUSAN
 
 SUGOD
 MUGNA NUMERO xyz, abc=100
-xyz = ((abc *5)/10 + 10) * -1
-IPAKITA
+xyz= ((abc *5)/10 + 10) * -1
+IPAKITA: [[] & xyz & []]
+KATAPUSAN
 
 
 SUGOD
 MUGNA NUMERO a=100, b=200, c=300
-MUGNA TINUOD d=”DILI”
+MUGNA TINUOD d="DILI"
 d = (a < b UG c <>200)
 IPAKITA: d
 KATAPUSAN
 
+//basic arithmetic
 SUGOD
-NUMERO z
-IPAKITA: "Enter z: "
-DAWAT: z
-IPAKITA: z
+MUGNA NUMERO x = 10, a = 10
+MUGNA NUMERO ans = x + a
+IPAKITA: ans
+KATAPUSAN
+
+// basic dawat/scan
+SUGOD
+MUGNA NUMERO z, y, ans
+IPAKITA: "Enter z & y: "
+DAWAT: z, y
+ans = z + y
+IPAKITA: ans
+KATAPUSAN
+
+// if statement
+SUGOD
+MUGNA NUMERO x = 3
+KUNG (x > 5)
+PUNDOK {
+    IPAKITA: "X is greater than 5"
+}
+KUNG DILI (x == 0)
+PUNDOK {
+    IPAKITA: "X is zero"
+}
+KUNG DILI (x < 0)
+PUNDOK {
+    IPAKITA: "X is negative"
+}
+KUNG WALA
+PUNDOK {
+    IPAKITA: "X is less than or equal to 5"
+}
 KATAPUSAN

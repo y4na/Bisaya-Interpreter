@@ -1,8 +1,19 @@
 SUGOD
-MUGNA NUMERO x, y, z=5
-MUGNA LETRA a_1='n'
-MUGNA TINUOD t="OO"
-x = y = 4
-a_1='c'
-IPAKITA: x & t & z & $ & a_1 & [#] & "last"
+MUGNA NUMERO x = -1
+KUNG (x > 5)
+PUNDOK {
+    IPAKITA: "X is greater than 5"
+}
+KUNG DILI (x == 0)
+PUNDOK {
+    IPAKITA: "X is zero"
+}
+KUNG DILI (x < 0)
+PUNDOK {
+    IPAKITA: "X is negative"
+}
+KUNG WALA
+PUNDOK {
+    IPAKITA: "X is less than or equal to 5"
+}
 KATAPUSAN

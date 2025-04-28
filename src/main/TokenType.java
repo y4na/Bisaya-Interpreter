@@ -63,4 +63,6 @@ enum TokenType {
     DECLARATION,
     BLOCK,
     EOF,
+    WALA,
+    DILI
 }

@@ -65,7 +65,7 @@ public class Parser {
                 return new Expr.Assign(name, value);
             }
 
-            error(equals, "Invalid assignment target.");
+            throw error(equals, "Invalid assignment target.");
         }
 
         return expr;
@@ -132,60 +132,88 @@ public class Parser {
     }
 
     private Stmt ifStatement() {
+        // IF (KUNG)
         consume(TokenType.LEFT_PARENTHESIS, "Expecting '(' after KUNG.");
         Expr condition = or();
-        consume(TokenType.RIGHT_PARENTHESIS, "Expecting ')' after an expression");
+        consume(TokenType.RIGHT_PARENTHESIS, "Expecting ')' after condition.");
 
-        consume(TokenType.BLOCK, "Expecting a PUNDOK after Condition.");
+        consume(TokenType.BLOCK, "Expecting PUNDOK after KUNG condition.");
+        consume(TokenType.LEFT_BRACE, "Expecting '{' after PUNDOK.");
 
         List<Stmt> thenBranch = new ArrayList<>();
+        while (!isAtEnd() && !check(TokenType.RIGHT_BRACE)) {
+            thenBranch.add(statement());
+        }
+        consume(TokenType.RIGHT_BRACE, "Expecting '}' after PUNDOK block.");
+
+        // Else if (KUNG DILI)
+        List<Expr> elseIfConditions = new ArrayList<>();
+        List<List<Stmt>> elseIfBranches = new ArrayList<>();
+
+        boolean foundDili = false;
+
+        while (check(TokenType.IF) && checkNext(TokenType.NOT)) {
+            advance();
+            advance();
+
+            consume(TokenType.LEFT_PARENTHESIS, "Expecting '(' after KUNG DILI.");
+            Expr elseIfCondition = or();
+            elseIfConditions.add(elseIfCondition);
+            consume(TokenType.RIGHT_PARENTHESIS, "Expecting ')' after KUNG DILI condition.");
+
+            consume(TokenType.BLOCK, "Expecting PUNDOK after KUNG DILI.");
+            consume(TokenType.LEFT_BRACE, "Expecting '{' after PUNDOK.");
+
+            List<Stmt> elseIfBranch = new ArrayList<>();
+            while (!isAtEnd() && !check(TokenType.RIGHT_BRACE)) {
+                elseIfBranch.add(statement());
+            }
+            elseIfBranches.add(elseIfBranch);
+            consume(TokenType.RIGHT_BRACE, "Expecting '}' after PUNDOK block.");
+
+            foundDili = true;
+        }
+
+        // Else (KUNG WALA)
+        List<Stmt> elseBranch = null;
+        if (check(TokenType.IF) && checkNext(TokenType.ELSE)) {
+
+            if (!foundDili) {
+                error(peek(), "KUNG WALA should be placed after KUNG DILI.");
+            }
+
+            advance();
+            advance();
+
+            consume(TokenType.BLOCK, "Expecting PUNDOK after KUNG WALA.");
+            consume(TokenType.LEFT_BRACE, "Expecting '{' after PUNDOK.");
+
+            elseBranch = new ArrayList<>();
+            while (!isAtEnd() && !check(TokenType.RIGHT_BRACE)) {
+                elseBranch.add(statement());
+            }
+            consume(TokenType.RIGHT_BRACE, "Expecting '}' after PUNDOK block.");
+        }
+
+        return new Stmt.If(condition, thenBranch, elseIfConditions, elseIfBranches, elseBranch);
+    }
+
+
+    private boolean checkNext(TokenType type) {
+        if (current + 1 >= tokens.size()) return false;
+        return tokens.get(current + 1).type == type;
+    }
+
+    private List<Stmt> blockStatements() {
+        List<Stmt> statements = new ArrayList<>();
         while (!isAtEnd() && !check(TokenType.END)) {
             if (check(TokenType.STRING) || check(TokenType.CHAR) || check(TokenType.INT) || check(TokenType.FLOAT)
                     || check(TokenType.BOOL) || check(TokenType.DECLARATION)) { // Changed IMMUTABLE to DECLARATION
                 afterVarDeclaration = true;
             }
-            thenBranch.add(statement());
+            statements.add(statement());
         }
-
-        List<Expr> elseIfConditions = new ArrayList<>();
-        List<List<Stmt>> elseIfBranches = new ArrayList<>();
-
-        while (peek().type == TokenType.ELSE && peekNext().type == TokenType.IF && !isAtEnd()) {
-            consume(TokenType.ELSE, "Expecting ELSE.");
-            consume(TokenType.IF, "Expecting IF.");
-            consume(TokenType.LEFT_PARENTHESIS, "Expecting '(' after IF.");
-            Expr elseIfCondition = or();
-            elseIfConditions.add(elseIfCondition);
-            consume(TokenType.RIGHT_PARENTHESIS, "Expecting ')' after an expression");
-            consume(TokenType.BEGIN, "Expecting a BEGIN after Condition.");
-            consume(TokenType.IF, "Expecting an IF after BEGIN");
-
-            List<Stmt> elseIfBranch = new ArrayList<>();
-            while (!isAtEnd() && !check(TokenType.END)) {
-                elseIfBranch.add(statement());
-            }
-
-            elseIfBranches.add(elseIfBranch);
-            consume(TokenType.END, "Expecting END after a statement.");
-            consume(TokenType.IF, "Expecting IF after END");
-        }
-
-        List<Stmt> elseBranch = null;
-
-        if (match(TokenType.ELSE)) {
-            elseBranch = new ArrayList<>();
-            consume(TokenType.BEGIN, "Expecting a BEGIN after Condition.");
-            consume(TokenType.IF, "Expecting an IF after BEGIN");
-
-            while (!isAtEnd() && !check(TokenType.END)) {
-                elseBranch.add(statement());
-            }
-
-            consume(TokenType.END, "Expecting END after a statement.");
-            consume(TokenType.IF, "Expecting IF after END");
-        }
-
-        return new Stmt.If(condition, thenBranch, elseIfConditions, elseIfBranches, elseBranch);
+        return statements;
     }
 
     private Stmt whileStatement() {
@@ -199,7 +227,7 @@ public class Parser {
         List<Stmt> body = new ArrayList<>();
         while (!isAtEnd() && !check(TokenType.END)) {
             if (check(TokenType.STRING) || check(TokenType.CHAR) || check(TokenType.INT) || check(TokenType.FLOAT)
-                    || check(TokenType.BOOL) || check(TokenType.DECLARATION)) { // Changed IMMUTABLE to DECLARATION
+                    || check(TokenType.BOOL) || check(TokenType.DECLARATION)) {
                 afterVarDeclaration = true;
             }
             body.add(statement());
@@ -221,11 +249,11 @@ public class Parser {
         if (declaration.type == TokenType.DECLARATION) { // Check for "MUGNA"
             token = consume(peek().type, "Expecting a variable type after MUGNA (DECLARATION).");
         } else {
-            error(declaration, "Expecting keyword MUGNA before variable declaration.");
+           throw error(declaration, "Expecting keyword MUGNA before variable declaration.");
         }
 
         do {
-            Token name = consume(TokenType.IDENTIFIER, "Expect variable name.");
+            Token name = consume(TokenType.IDENTIFIER, "Expect proper variable declaration.");
             names.add(name);
             Expr initializer = null;
 
@@ -339,7 +367,7 @@ public class Parser {
         if (!check(TokenType.RIGHT_PARENTHESIS)) {
             do {
                 if (arguments.size() >= 255) {
-                    error(peek(), "Can't have more than 255 arguments");
+                    throw error(peek(), "Can't have more than 255 arguments");
                 }
                 arguments.add(expression());
             } while (match(TokenType.COMMA));
@@ -370,7 +398,7 @@ public class Parser {
 
         String message = "Expect expression.";
         if (afterVarDeclaration) {
-            message = "You can only declare variable after the begin code.";
+            message = "You can only declare variable after the SUGOD block.";
         }
         throw error(peek(), message);
     }

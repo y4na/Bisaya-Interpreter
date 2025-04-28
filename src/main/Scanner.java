@@ -23,19 +23,18 @@ public class Scanner {
         keywords.put("NUMERO", TokenType.INT);
         keywords.put("TIPIK", TokenType.FLOAT);
         keywords.put("TINUOD", TokenType.BOOL);
+
         keywords.put("KUNG", TokenType.IF);
-        keywords.put("KUNG WALA", TokenType.ELSE);
-        keywords.put("KUNG DILI", TokenType.ELSE_IF);
+        keywords.put("WALA", TokenType.ELSE);
+//        keywords.put("KUNG WALA", TokenType.ELSE); // di mo gana if nay space nga keyword
+//        keywords.put("KUNG DILI", TokenType.ELSE_IF);
+
         keywords.put("ALANG SA", TokenType.FOR);
         keywords.put("UG", TokenType.AND);
         keywords.put("O", TokenType.OR);
         keywords.put("DILI", TokenType.NOT);
         keywords.put("MUGNA", TokenType.DECLARATION);
         keywords.put("PUNDOK", TokenType.BLOCK);
-        keywords.put("OO", TokenType.TRUE_LITERAL);
-        keywords.put("DILI", TokenType.FALSE_LITERAL);
-
-        keywords.put("WALA", TokenType.NULL); // not included
     }
 
 
@@ -294,8 +293,12 @@ public class Scanner {
 
         String text = source.substring(start, current);
         TokenType type = keywords.get(text);
-        if (type == null)
+
+        if (type == null) {
             type = TokenType.IDENTIFIER;
+        }
+
         addToken(type);
     }
+
 }
