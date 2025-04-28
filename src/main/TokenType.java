@@ -47,7 +47,6 @@ enum TokenType {
 
     // Keywords
     BEGIN,
-    //    CODE,
     END,
     DISPLAY,
     SCAN,
@@ -55,14 +54,10 @@ enum TokenType {
     ELSE,
     WHILE,
     FOR,
+    THE,
     AND,
     OR,
-    FUNCTION,
-    ELSE_IF,
-    RETURN,
     DECLARATION,
     BLOCK,
     EOF,
-    WALA,
-    DILI
 }

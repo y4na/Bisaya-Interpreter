@@ -26,13 +26,14 @@ public class Scanner {
 
         keywords.put("KUNG", TokenType.IF);
         keywords.put("WALA", TokenType.ELSE);
-//        keywords.put("KUNG WALA", TokenType.ELSE); // di mo gana if nay space nga keyword
-//        keywords.put("KUNG DILI", TokenType.ELSE_IF);
 
-        keywords.put("ALANG SA", TokenType.FOR);
+        keywords.put("ALANG", TokenType.FOR);
+        keywords.put("SA", TokenType.THE);
+
         keywords.put("UG", TokenType.AND);
         keywords.put("O", TokenType.OR);
         keywords.put("DILI", TokenType.NOT);
+
         keywords.put("MUGNA", TokenType.DECLARATION);
         keywords.put("PUNDOK", TokenType.BLOCK);
     }
@@ -93,6 +94,12 @@ public class Scanner {
                 addToken(TokenType.PLUS);
                 break;
             case '-':
+                if (match('-')) {
+                    while (!isAtNewLine() && !isAtEnd()) {
+                        advance();
+                    }
+                    break;
+                }
                 addToken(TokenType.MINUS);
                 break;
             case '*':
