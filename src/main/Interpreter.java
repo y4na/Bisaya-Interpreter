@@ -21,7 +21,7 @@ import main.Stmt.If;
 import main.Stmt.Int;
 import main.Stmt.Print;
 import main.Stmt.Scan;
-import main.Stmt.While;
+import main.Stmt.For;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
@@ -34,9 +34,6 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
     void interpret(List<Stmt> statements) {
         try {
             for (Stmt statement : statements) {
-                if (statement instanceof Stmt.Print) {
-                    hasDisplay = true;
-                }
                 execute(statement);
             }
             if (!hasDisplay) {
@@ -46,6 +43,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
             Main.runtimeError(e);
         }
     }
+
 
     @Override
     public Object visitBinaryExpr(Binary expr) {
@@ -199,6 +197,10 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
     }
 
     private void execute(Stmt stmt) {
+        if (stmt instanceof Stmt.Print) {
+            hasDisplay = true;
+        }
+
         stmt.accept(this);
     }
 
@@ -264,13 +266,13 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
 
         return value.toString();
     }
+
     @Override
     public Void visitPrintStmt(Print stmt) {
         Object value = evaluate(stmt.expression);
         System.out.print(stringify(value));
         return null;
     }
-
 
     @Override
     public Object visitIntStmt(Int stmt) {
@@ -412,13 +414,17 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
     }
 
     @Override
-    public Object visitWhileStmt(While stmt) {
+    public Object visitForStmt(For stmt) {
+        if (stmt.initializer != null) {
+            execute(stmt.initializer);
+        }
+
         while (isTruthy(evaluate(stmt.condition))) {
             for (Stmt statement : stmt.body) {
-                if (statement instanceof Stmt.Print) {
-                    hasDisplay = true;
-                }
                 execute(statement);
+            }
+            if (stmt.increment != null) {
+                evaluate(stmt.increment);
             }
         }
 

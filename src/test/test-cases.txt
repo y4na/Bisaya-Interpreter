@@ -64,3 +64,133 @@ PUNDOK {
     IPAKITA: "X is less than or equal to 5"
 }
 KATAPUSAN
+
+SUGOD
+MUGNA NUMERO score = 85
+
+KUNG (score >= 75) PUNDOK{
+    MUGNA LETRA grade = 'P' // Passed
+    KUNG (score >= 90) PUNDOK{
+        grade = 'A' // Excellent
+    } KUNG DILI (score >= 80) PUNDOK{
+        grade = 'B' // Good
+    }
+    IPAKITA: "Ang grado kay: " & grade & BAG-ONG_LINYA
+} KUNG WALA PUNDOK{
+    IPAKITA: "Wala naka-pasar." & BAG-ONG_LINYA
+}
+KATAPUSAN
+
+// for loop
+SUGOD
+MUGNA NUMERO ctr = 1
+ALANG SA (ctr=1, ctr<=10, ctr++)
+PUNDOK{
+ IPAKITA: ctr & ' '
+}
+KATAPUSAN
+
+//nested for if
+SUGOD
+MUGNA NUMERO ihap
+ALANG SA (ihap=1, ihap<=10, ihap++)
+PUNDOK{
+    KUNG (ihap % 2 == 0) PUNDOK{
+        IPAKITA: ihap & " kay even." & $
+    }
+}
+KATAPUSAN
+
+SUGOD
+MUGNA NUMERO score = 78
+MUGNA LETRA grade
+
+KUNG (score >= 60) PUNDOK{ // Check if passing
+    KUNG (score >= 75) PUNDOK{ // Passed, now check for higher grades
+        grade = 'P' // Default pass
+        KUNG (score >= 90) PUNDOK{
+            grade = 'A' // Excellent
+        } KUNG DILI (score >= 80) PUNDOK{
+            grade = 'B' // Good
+        } KUNG DILI (score >= 75) PUNDOK{
+            grade = 'C' // Satisfactory (although this condition is redundant given the outer if)
+        }
+    } KUNG WALA PUNDOK{ // Score is >= 60 but < 75
+        grade = 'D' // Fair
+    }
+    IPAKITA: "Ang grado kay: " & grade & BAG-ONG_LINYA
+} KUNG WALA PUNDOK{ // Score is less than 60
+    IPAKITA: "Wala naka-pasar." & BAG-ONG_LINYA
+}
+KATAPUSAN
+
+SUGOD
+MUGNA NUMERO outer_num, inner_num
+MUGNA TINUOD is_even, is_positive
+
+ALANG SA (outer_num = -2, outer_num <= 2, outer_num++)
+PUNDOK{
+    ALANG SA (inner_num = 1, inner_num <= 3, inner_num++)
+    PUNDOK{
+        is_even = (inner_num % 2 == 0)
+        is_positive = (outer_num > 0)
+
+        KUNG (is_even UG is_positive) PUNDOK{
+            IPAKITA: "Even ug Positive: " & outer_num & ", " & inner_num & $
+        } KUNG DILI (is_even O DILI is_positive) PUNDOK{
+            IPAKITA: "Dili Even o Dili Positive: " & outer_num & ", " & inner_num & $
+        } KUNG WALA PUNDOK{
+            IPAKITA: "Neither (Even UG Positive) nor (Dili Even O Dili Positive): " & outer_num & ", " & inner_num & $
+        }
+    }
+}
+KATAPUSAN
+
+//nested for if nested if
+SUGOD
+MUGNA NUMERO outer_num, inner_num
+MUGNA TINUOD is_positive, is_even
+
+ALANG SA (outer_num = 1, outer_num <= 3, outer_num++)
+PUNDOK{
+    KUNG (outer_num > 1) PUNDOK{
+        ALANG SA (inner_num = 1, inner_num <= 2, inner_num++)
+        PUNDOK{
+            is_even = (inner_num % 2 == 0)
+            KUNG (is_even) PUNDOK{
+                IPAKITA: "Outer: " & outer_num & ", Inner (Even): " & inner_num & $
+            }
+        }
+    }
+}
+KATAPUSAN
+
+// impossible this does not work yet
+SUGOD
+ALANG SA (student_num = 1, student_num <= 3, student_num++)
+PUNDOK{
+    MUGNA NUMERO score
+
+    KUNG (student_num == 1) PUNDOK{
+        score = 60
+    } KUNG DILI (student_num == 2) PUNDOK{
+        score = 85
+    } KUNG WALA PUNDOK{
+        score = 95
+    }
+
+    IPAKITA: "Estudyante #" & student_num & ":" & $
+    KUNG (score >= 75) PUNDOK{
+        MUGNA LETRA grade = 'P'
+        KUNG (score >= 90) PUNDOK{
+            grade = 'A'
+        } KUNG DILI (score >= 80) PUNDOK{
+            grade = 'B'
+        }
+        IPAKITA: "  Ang grado kay: " & grade & $
+    } KUNG WALA PUNDOK{
+        IPAKITA: "  Wala naka-pasar." & $
+    }
+    IPAKITA: $
+}
+KATAPUSAN

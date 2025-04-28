@@ -14,7 +14,7 @@ abstract class Stmt {
 
         R visitScanStmt(Scan stmt);
 
-        R visitWhileStmt(While stmt);
+        R visitForStmt(For stmt);
 
         R visitIntStmt(Int stmt);
 
@@ -100,20 +100,25 @@ abstract class Stmt {
         final List<Token> identifiers;
     }
 
-    static class While extends Stmt {
-        While(Expr condition, List<Stmt> body) {
+    static class For extends Stmt {
+        For(Stmt initializer, Expr condition, Expr increment, List<Stmt> body) {
+            this.initializer = initializer;
             this.condition = condition;
+            this.increment = increment;
             this.body = body;
         }
 
         @Override
         <R> R accept(Visitor<R> visitor) {
-            return visitor.visitWhileStmt(this);
+            return visitor.visitForStmt(this);
         }
 
+        final Stmt initializer;
         final Expr condition;
+        final Expr increment;
         final List<Stmt> body;
     }
+
 
     static class Int extends Stmt {
         Int(Token name, Expr initializer, boolean mutable) {

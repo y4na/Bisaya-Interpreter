@@ -109,8 +109,9 @@ public class Parser {
             return ifStatement();
         }
 
-        if (match(TokenType.WHILE)) {
-            return whileStatement();
+        if (match(TokenType.FOR)) {
+            consume(TokenType.THE, "Expecting 'SA' after 'ALANG'.");
+            return forStatement();
         }
 
         return expressionStatement();
@@ -132,106 +133,145 @@ public class Parser {
     }
 
     private Stmt ifStatement() {
-        // IF (KUNG)
+        // The IF (KUNG) token was already consumed by statement().
+
+        // --- Parse IF (KUNG) part ---
         consume(TokenType.LEFT_PARENTHESIS, "Expecting '(' after KUNG.");
-        Expr condition = or();
-        consume(TokenType.RIGHT_PARENTHESIS, "Expecting ')' after condition.");
+        Expr condition = expression(); // Parse the main condition.
+        consume(TokenType.RIGHT_PARENTHESIS, "Expecting ')' after KUNG condition.");
 
         consume(TokenType.BLOCK, "Expecting PUNDOK after KUNG condition.");
         consume(TokenType.LEFT_BRACE, "Expecting '{' after PUNDOK.");
+        // Parse the statements inside the 'then' block.
+        List<Stmt> thenBranch = block(); // Use helper 'block()' method
+        // consume(TokenType.RIGHT_BRACE, "Expecting '}' after KUNG PUNDOK block."); // block() handles this
 
-        List<Stmt> thenBranch = new ArrayList<>();
-        while (!isAtEnd() && !check(TokenType.RIGHT_BRACE)) {
-            thenBranch.add(statement());
-        }
-        consume(TokenType.RIGHT_BRACE, "Expecting '}' after PUNDOK block.");
-
-        // Else if (KUNG DILI)
+        // --- Parse ELSE IF (KUNG DILI) parts ---
         List<Expr> elseIfConditions = new ArrayList<>();
         List<List<Stmt>> elseIfBranches = new ArrayList<>();
 
-        boolean foundDili = false;
-
+        // Loop while we see "KUNG DILI".
         while (check(TokenType.IF) && checkNext(TokenType.NOT)) {
-            advance();
-            advance();
+            advance(); // Consume IF (KUNG)
+            advance(); // Consume NOT (DILI)
 
             consume(TokenType.LEFT_PARENTHESIS, "Expecting '(' after KUNG DILI.");
-            Expr elseIfCondition = or();
+            Expr elseIfCondition = expression(); // Parse the else if condition.
             elseIfConditions.add(elseIfCondition);
             consume(TokenType.RIGHT_PARENTHESIS, "Expecting ')' after KUNG DILI condition.");
 
-            consume(TokenType.BLOCK, "Expecting PUNDOK after KUNG DILI.");
+            consume(TokenType.BLOCK, "Expecting PUNDOK after KUNG DILI condition.");
             consume(TokenType.LEFT_BRACE, "Expecting '{' after PUNDOK.");
-
-            List<Stmt> elseIfBranch = new ArrayList<>();
-            while (!isAtEnd() && !check(TokenType.RIGHT_BRACE)) {
-                elseIfBranch.add(statement());
-            }
+            // Parse the statements inside this 'else if' block.
+            List<Stmt> elseIfBranch = block(); // Use helper 'block()' method
             elseIfBranches.add(elseIfBranch);
-            consume(TokenType.RIGHT_BRACE, "Expecting '}' after PUNDOK block.");
-
-            foundDili = true;
+            // consume(TokenType.RIGHT_BRACE, "Expecting '}' after KUNG DILI PUNDOK block."); // block() handles this
         }
 
-        // Else (KUNG WALA)
-        List<Stmt> elseBranch = null;
+        // --- Parse ELSE (KUNG WALA) part ---
+        List<Stmt> elseBranch = null; // Default to no else branch.
+        // Check for "KUNG WALA".
         if (check(TokenType.IF) && checkNext(TokenType.ELSE)) {
+            advance(); // Consume IF (KUNG)
+            advance(); // Consume ELSE (WALA)
 
-            if (!foundDili) {
-                error(peek(), "KUNG WALA should be placed after KUNG DILI.");
-            }
-
-            advance();
-            advance();
+            // *** REMOVED THE INCORRECT CHECK THAT REQUIRED A PREVIOUS KUNG DILI ***
+            // if (!foundDili) { // This check was removed!
+            //     error(peek(), "KUNG WALA should be placed after KUNG DILI.");
+            // }
 
             consume(TokenType.BLOCK, "Expecting PUNDOK after KUNG WALA.");
             consume(TokenType.LEFT_BRACE, "Expecting '{' after PUNDOK.");
-
-            elseBranch = new ArrayList<>();
-            while (!isAtEnd() && !check(TokenType.RIGHT_BRACE)) {
-                elseBranch.add(statement());
-            }
-            consume(TokenType.RIGHT_BRACE, "Expecting '}' after PUNDOK block.");
+            // Parse the statements inside the 'else' block.
+            elseBranch = block(); // Use helper 'block()' method
+            // consume(TokenType.RIGHT_BRACE, "Expecting '}' after KUNG WALA PUNDOK block."); // block() handles this
         }
 
+        // Construct and return the AST node for the IF statement.
         return new Stmt.If(condition, thenBranch, elseIfConditions, elseIfBranches, elseBranch);
     }
 
-    // this was a helper statement for the PUNDOK but wa na nako gigamit
-    private List<Stmt> blockStatements() {
-        List<Stmt> statements = new ArrayList<>();
-        while (!isAtEnd() && !check(TokenType.END)) {
-            if (check(TokenType.STRING) || check(TokenType.CHAR) || check(TokenType.INT) || check(TokenType.FLOAT)
-                    || check(TokenType.BOOL) || check(TokenType.DECLARATION)) { // Changed IMMUTABLE to DECLARATION
-                afterVarDeclaration = true;
-            }
-            statements.add(statement());
+    private Stmt forStatement() {
+        consume(TokenType.LEFT_PARENTHESIS, "Expecting '(' after ALANG SA.");
+
+        Stmt initializer;
+        if (match(TokenType.DECLARATION)) {
+            initializer = varDeclaration().get(0);
+        } else if (match(TokenType.IDENTIFIER)) {
+            Token name = previous();
+            consume(TokenType.EQUAL, "Expect '=' in initializer.");
+            Expr value = expression();
+            initializer = new Stmt.Expression(new Expr.Assign(name, value));
+        } else {
+            throw error(peek(), "Invalid initializer in ALANG SA.");
         }
-        return statements;
-    }
 
-    private Stmt whileStatement() {
-        consume(TokenType.LEFT_PARENTHESIS, "Expecting '(' after WHILE.");
+        consume(TokenType.COMMA, "Expect ',' after initializer.");
+
         Expr condition = expression();
-        consume(TokenType.RIGHT_PARENTHESIS, "Expecting ')' after an expression");
+        consume(TokenType.COMMA, "Expect ',' after condition.");
 
-        consume(TokenType.BEGIN, "Expecting a BEGIN after Condition.");
-        consume(TokenType.WHILE, "Expecting a WHILE after BEGIN");
+        Expr increment;
+        if (match(TokenType.IDENTIFIER)) {
+            Token name = previous();
+            if (match(TokenType.PLUS_PLUS)) {
+                increment = new Expr.Assign(
+                        name,
+                        new Expr.Binary(
+                                new Expr.Variable(name),
+                                new Token(TokenType.PLUS, "+", null, name.line),
+                                new Expr.Literal(1)
+                        )
+                );
+            } else if (match(TokenType.MINUS_MINUS)) {
+                increment = new Expr.Assign(
+                        name,
+                        new Expr.Binary(
+                                new Expr.Variable(name),
+                                new Token(TokenType.MINUS, "-", null, name.line),
+                                new Expr.Literal(1)
+                        )
+                );
+            } else {
+                throw error(peek(), "Expect '++' or '--' after variable in increment.");
+            }
+        } else {
+            throw error(peek(), "Expect variable name in increment.");
+        }
+
+        consume(TokenType.RIGHT_PARENTHESIS, "Expect ')' after ALANG SA clauses.");
+
+        consume(TokenType.BLOCK, "Expecting PUNDOK after ALANG SA.");
+        consume(TokenType.LEFT_BRACE, "Expecting '{' after PUNDOK.");
 
         List<Stmt> body = new ArrayList<>();
-        while (!isAtEnd() && !check(TokenType.END)) {
-            if (check(TokenType.STRING) || check(TokenType.CHAR) || check(TokenType.INT) || check(TokenType.FLOAT)
-                    || check(TokenType.BOOL) || check(TokenType.DECLARATION)) {
-                afterVarDeclaration = true;
-            }
+        while (!check(TokenType.RIGHT_BRACE) && !isAtEnd()) {
             body.add(statement());
         }
+        consume(TokenType.RIGHT_BRACE, "Expecting '}' after PUNDOK block.");
 
-        consume(TokenType.END, "Expecting END after a statement.");
-        consume(TokenType.WHILE, "Expecting WHILE after END");
+        return new Stmt.For(initializer, condition, increment, body);
+    }
 
-        return new Stmt.While(condition, body);
+    private List<Stmt> block() {
+        List<Stmt> statements = new ArrayList<>();
+
+        // Keep parsing statements until the closing brace or end of file is reached.
+        while (!check(TokenType.RIGHT_BRACE) && !isAtEnd()) {
+            statements.add(statement()); // Recursively parse statements inside the block.
+        }
+
+        // Expect a closing brace to end the block.
+        consume(TokenType.RIGHT_BRACE, "Expect '}' after block.");
+        return statements; // Return the list of statements found in the block.
+    }
+
+    private void debugPrintTokens(List<Token> tokens) {
+        System.out.println("=== DEBUG: TOKENS ===");
+        for (Token token : tokens) {
+            System.out.println(token.type + " -> " + token.lexeme);
+        }
+        System.out.println("=====================");
     }
 
     private List<Stmt> varDeclaration() {

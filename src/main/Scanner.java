@@ -36,6 +36,9 @@ public class Scanner {
 
         keywords.put("MUGNA", TokenType.DECLARATION);
         keywords.put("PUNDOK", TokenType.BLOCK);
+
+        keywords.put("++", TokenType.PLUS_PLUS);
+        keywords.put("--", TokenType.MINUS_MINUS);
     }
 
 
@@ -91,16 +94,26 @@ public class Scanner {
                 addToken(TokenType.COLON);
                 break;
             case '+':
-                addToken(TokenType.PLUS);
+                if (match('+')) {
+                    addToken(TokenType.PLUS_PLUS);
+                } else {
+                    addToken(TokenType.PLUS);
+                }
                 break;
             case '-':
                 if (match('-')) {
-                    while (!isAtNewLine() && !isAtEnd()) {
-                        advance();
+                    if (isAtLineStart() || isPrevWhitespace()) {
+                        // Treat as comment ( -- comment )
+                        while (!isAtNewLine() && !isAtEnd()) {
+                            advance();
+                        }
+                    } else {
+                        // Treat as decrement operator ( --i )
+                        addToken(TokenType.MINUS_MINUS);
                     }
-                    break;
+                } else {
+                    addToken(TokenType.MINUS);
                 }
-                addToken(TokenType.MINUS);
                 break;
             case '*':
                 addToken(TokenType.STAR);
@@ -176,6 +189,16 @@ public class Scanner {
                 }
                 break;
         }
+    }
+
+    private boolean isAtLineStart() {
+        return start == 0 || source.charAt(start - 1) == '\n';
+    }
+
+    private boolean isPrevWhitespace() {
+        if (start == 0) return true;
+        char prev = source.charAt(start - 1);
+        return prev == ' ' || prev == '\r' || prev == '\t' || prev == '\n';
     }
 
     private boolean match(char expected) {
