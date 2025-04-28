@@ -209,15 +209,17 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
         try {
             this.environment = environment;
             for (Stmt statement : statements) {
-                if (statement instanceof Stmt.Print) {
-                    hasDisplay = true;
-                }
+                // You might want to reconsider setting hasDisplay globally here
+                // if executeBlock is used in places where display isn't the primary output.
+                // Or reset it before calling executeBlock if needed.
+                // if (statement instanceof Stmt.Print) {
+                //    hasDisplay = true;
+                // }
                 execute(statement);
             }
         } finally {
             this.environment = previous;
         }
-
     }
 
     private boolean isTruthy(Object object) {
@@ -256,7 +258,6 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
         return null;
     }
 
-    // changes the TRUE/FALSE TO OO/DILI upon printing and displaying
     private String stringify(Object value) {
         if (value == null) return "null";
 
@@ -359,40 +360,20 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
 
     @Override
     public Object visitIfStmt(If stmt) {
-
         if (isTruthy(evaluate(stmt.condition))) {
-            for (Stmt statement : stmt.thenBranch) {
-                if (statement instanceof Stmt.Print) {
-                    hasDisplay = true;
-                }
-                execute(statement);
-            }
+            executeBlock(stmt.thenBranch, new Environment(environment));
         } else {
+            boolean executedElseIf = false;
             for (int i = 0; i < stmt.elseIfBranches.size(); i++) {
                 if (isTruthy(evaluate(stmt.elseIfConditions.get(i)))) {
-                    for (Stmt statement : stmt.elseIfBranches.get(i)) {
-                        if (statement instanceof Stmt.Print) {
-                            hasDisplay = true;
-                        }
-                        execute(statement);
-                        return null;
-                    }
-                } else {
-                    for (Stmt statement : stmt.elseIfBranches.get(i)) {
-                        if (statement instanceof Stmt.Print) {
-                            hasDisplay = true;
-                        }
-                    }
+                    executeBlock(stmt.elseIfBranches.get(i), new Environment(environment));
+                    executedElseIf = true;
+                    break;
                 }
             }
 
-            if (stmt.elseBranch != null) {
-                for (Stmt statement : stmt.elseBranch) {
-                    if (statement instanceof Stmt.Print) {
-                        hasDisplay = true;
-                    }
-                    execute(statement);
-                }
+            if (!executedElseIf && stmt.elseBranch != null) {
+                executeBlock(stmt.elseBranch, new Environment(environment));
             }
         }
         return null;
@@ -420,9 +401,8 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
         }
 
         while (isTruthy(evaluate(stmt.condition))) {
-            for (Stmt statement : stmt.body) {
-                execute(statement);
-            }
+            executeBlock(stmt.body, new Environment(environment));
+
             if (stmt.increment != null) {
                 evaluate(stmt.increment);
             }
@@ -438,7 +418,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
         String line = scanner.nextLine();
 
         List<String> input = List.of(line.split(",")).stream()
-                .map(String::trim) // Trim each element using stream API
+                .map(String::trim)
                 .collect(Collectors.toList());
 
         List<Object> parsedInput = new ArrayList<>();

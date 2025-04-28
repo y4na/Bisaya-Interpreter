@@ -1,0 +1,40 @@
+SUGOD
+MUGNA NUMERO ctr
+
+ALANG SA (ctr=1, ctr<=5, ctr++)
+PUNDOK{
+    MUGNA TINUOD even
+
+    KUNG (ctr % 2 == 0)
+    PUNDOK{
+        even = "OO"
+    }
+    KUNG WALA
+    PUNDOK{
+        even = "DILI"
+    }
+
+    IPAKITA: "Ctr: " & ctr & " Even? " & even & $
+}
+KATAPUSAN
+
+
+SUGOD
+MUGNA TINUOD showList="OO"
+
+KUNG (showList)
+PUNDOK{
+    MUGNA NUMERO i
+
+    ALANG SA (i=1, i<=3, i++)
+    PUNDOK{
+        MUGNA NUMERO square
+        square = i * i
+        IPAKITA: "i: " & i & " square: " & square & $
+    }
+}
+KUNG WALA
+PUNDOK{
+    IPAKITA: "Wala’y Listahan."
+}
+KATAPUSAN

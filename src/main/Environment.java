@@ -56,74 +56,50 @@ public class Environment {
 
     @SuppressWarnings("incomplete-switch")
     void assign(Token name, Object value) {
-        TokenType type = getType(name);
-        boolean mutable = getMutability(name);
-        if (mutable) {
-            switch (type) {
-                case STRING:
-                    if (value instanceof String) {
-                        values.put(name.lexeme, new Variable(TokenType.STRING, value, mutable));
-                        return;
-                    } else {
-                        Object v = value;
-                        if (value instanceof Boolean) {
-                            v = value.toString().toUpperCase();
-                        }
-                        throw new RuntimeError(name,
-                                "Cannot assign the value '" + v + "' to variable of type String.");
+        Environment environment = this;
+        while (environment != null) {
+            if (environment.values.containsKey(name.lexeme)) {
 
-                    }
-                case CHAR:
-                    if (value instanceof Character) {
-                        values.put(name.lexeme, new Variable(TokenType.CHAR, value, mutable));
-                        return;
-                    } else {
-                        Object v = value;
-                        if (value instanceof Boolean) {
-                            v = value.toString().toUpperCase();
-                        }
-                        throw new RuntimeError(name,
-                                "Cannot assign the value '" + v + "' to variable of type Character.");
-                    }
-                case INT:
-                    if (value instanceof Integer) {
-                        values.put(name.lexeme, new Variable(TokenType.INT, value, mutable));
-                        return;
-                    } else {
-                        Object v = value;
-                        if (value instanceof Boolean) {
-                            v = value.toString().toUpperCase();
-                        }
-                        throw new RuntimeError(name,
-                                "Cannot assign the value '" + v + "' to variable of type Integer.");
-                    }
-                case FLOAT:
-                    if (value instanceof Double) {
-                        values.put(name.lexeme, new Variable(TokenType.FLOAT, value, mutable));
-                        return;
-                    } else {
-                        Object v = value;
-                        if (value instanceof Boolean) {
-                            v = value.toString().toUpperCase();
-                        }
-                        throw new RuntimeError(name,
-                                "Cannot assign the value '" + v + "' to variable of type Float.");
-                    }
-                case BOOL:
-                    if (value instanceof Boolean) {
-                        values.put(name.lexeme, new Variable(TokenType.BOOL, value, mutable));
-                        return;
-                    } else {
-                        throw new RuntimeError(name,
-                                "Cannot assign the value '" + value + "' to variable of type Boolean.");
-                    }
+                Variable existingVar = environment.values.get(name.lexeme);
+
+                if (!existingVar.isMutable()) {
+                    throw new RuntimeError(name, "Cannot assign to immutable variable '" + name.lexeme + "'.");
+                }
+
+                TokenType expectedType = existingVar.getType();
+
+                boolean typeMatch = false;
+                if (expectedType == TokenType.INT && value instanceof Integer) {
+                    typeMatch = true;
+                } else if (expectedType == TokenType.FLOAT && value instanceof Double) {
+                    typeMatch = true;
+                } else if (expectedType == TokenType.CHAR && value instanceof Character) {
+                    typeMatch = true;
+                } else if (expectedType == TokenType.STRING && value instanceof String) {
+                    typeMatch = true;
+                } else if (expectedType == TokenType.BOOL && value instanceof Boolean) {
+                    typeMatch = true;
+                }
+
+                if (!typeMatch) {
+
+                    String valueStr = value == null ? "null" : value.toString();
+                    if (value instanceof Boolean) valueStr = valueStr.toUpperCase();
+                    if (value instanceof String) valueStr = "\"" + valueStr + "\"";
+                    if (value instanceof Character) valueStr = "'" + valueStr + "'";
+
+                    throw new RuntimeError(name,
+                            "Type mismatch: Cannot assign value " + valueStr +
+                                    " (" + (value == null ? "Null" : value.getClass().getSimpleName()) + ")" +
+                                    " to variable '" + name.lexeme + "' of type " + expectedType + ".");
+                }
+
+                environment.values.put(name.lexeme, new Variable(expectedType, value, true)); // Keep mutability true
+                return;
             }
-
-        } else {
-            throw new RuntimeError(name,
-                    "Cannot assign the value '" + value + "' to an immutable variable");
+            environment = environment.enclosing;
         }
 
-        throw new RuntimeError(name, "Undefined variable '" + name.lexeme + "'.");
+        throw new RuntimeError(name, "Undefined variable '" + name.lexeme + "' during assignment attempt.");
     }
 }

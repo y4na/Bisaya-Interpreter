@@ -1,0 +1,48 @@
+SUGOD
+MUGNA NUMERO a=10
+IPAKITA: a
+-- forgot KATAPUSAN
+
+
+SUGOD
+MUGNA NUMERO a='x'
+IPAKITA: a
+KATAPUSAN
+
+
+SUGOD
+MUGNA NUMERO a
+a 10
+IPAKITA: a
+KATAPUSAN
+
+
+SUGOD
+MUGNA NUMERO SUGOD=10
+IPAKITA: SUGOD
+KATAPUSAN
+
+
+SUGOD
+MUGNA TINUOD a="OO"
+MUGNA NUMERO b=10
+MUGNA TINUOD result
+
+result = (a UG b)
+IPAKITA: result
+KATAPUSAN
+
+
+SUGOD
+
+ALANG SA (ctr=1, ctr<=1, ctr++)
+PUNDOK{
+    MUGNA NUMERO temp=100
+    IPAKITA: "Inside loop temp: " & temp
+}
+
+-- This should cause an ERROR
+IPAKITA: "Outside loop temp: " & temp
+
+KATAPUSAN
+

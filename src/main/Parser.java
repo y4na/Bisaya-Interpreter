@@ -65,7 +65,7 @@ public class Parser {
                 return new Expr.Assign(name, value);
             }
 
-            throw error(equals, "Invalid assignment target.");
+            throw error(equals, "Invalid assignment target. Cannot assign to " + expr.getClass().getSimpleName() + ".");
         }
 
         return expr;
@@ -95,6 +95,9 @@ public class Parser {
     }
 
     private Stmt statement() {
+        if (match(TokenType.DECLARATION)) {
+            return varDeclaration().get(0);
+        }
         if (match(TokenType.DISPLAY)) {
             consume(TokenType.COLON, "Expecting ':' after IPAKITA");
             return displayStatement();
@@ -133,27 +136,23 @@ public class Parser {
     }
 
     private Stmt ifStatement() {
-        // The IF (KUNG) token was already consumed by statement().
-
-        // --- Parse IF (KUNG) part ---
+        //IF (KUNG)
         consume(TokenType.LEFT_PARENTHESIS, "Expecting '(' after KUNG.");
         Expr condition = expression(); // Parse the main condition.
         consume(TokenType.RIGHT_PARENTHESIS, "Expecting ')' after KUNG condition.");
 
         consume(TokenType.BLOCK, "Expecting PUNDOK after KUNG condition.");
         consume(TokenType.LEFT_BRACE, "Expecting '{' after PUNDOK.");
-        // Parse the statements inside the 'then' block.
-        List<Stmt> thenBranch = block(); // Use helper 'block()' method
-        // consume(TokenType.RIGHT_BRACE, "Expecting '}' after KUNG PUNDOK block."); // block() handles this
 
-        // --- Parse ELSE IF (KUNG DILI) parts ---
+        List<Stmt> thenBranch = block();
+
+        // ELSE IF (KUNG DILI)
         List<Expr> elseIfConditions = new ArrayList<>();
         List<List<Stmt>> elseIfBranches = new ArrayList<>();
 
-        // Loop while we see "KUNG DILI".
         while (check(TokenType.IF) && checkNext(TokenType.NOT)) {
-            advance(); // Consume IF (KUNG)
-            advance(); // Consume NOT (DILI)
+            advance();
+            advance();
 
             consume(TokenType.LEFT_PARENTHESIS, "Expecting '(' after KUNG DILI.");
             Expr elseIfCondition = expression(); // Parse the else if condition.
@@ -162,32 +161,24 @@ public class Parser {
 
             consume(TokenType.BLOCK, "Expecting PUNDOK after KUNG DILI condition.");
             consume(TokenType.LEFT_BRACE, "Expecting '{' after PUNDOK.");
-            // Parse the statements inside this 'else if' block.
-            List<Stmt> elseIfBranch = block(); // Use helper 'block()' method
+
+            List<Stmt> elseIfBranch = block();
             elseIfBranches.add(elseIfBranch);
-            // consume(TokenType.RIGHT_BRACE, "Expecting '}' after KUNG DILI PUNDOK block."); // block() handles this
         }
 
-        // --- Parse ELSE (KUNG WALA) part ---
-        List<Stmt> elseBranch = null; // Default to no else branch.
-        // Check for "KUNG WALA".
-        if (check(TokenType.IF) && checkNext(TokenType.ELSE)) {
-            advance(); // Consume IF (KUNG)
-            advance(); // Consume ELSE (WALA)
+        // ELSE (KUNG WALA)
+        List<Stmt> elseBranch = null;
 
-            // *** REMOVED THE INCORRECT CHECK THAT REQUIRED A PREVIOUS KUNG DILI ***
-            // if (!foundDili) { // This check was removed!
-            //     error(peek(), "KUNG WALA should be placed after KUNG DILI.");
-            // }
+        if (check(TokenType.IF) && checkNext(TokenType.ELSE)) {
+            advance();
+            advance();
 
             consume(TokenType.BLOCK, "Expecting PUNDOK after KUNG WALA.");
             consume(TokenType.LEFT_BRACE, "Expecting '{' after PUNDOK.");
-            // Parse the statements inside the 'else' block.
-            elseBranch = block(); // Use helper 'block()' method
-            // consume(TokenType.RIGHT_BRACE, "Expecting '}' after KUNG WALA PUNDOK block."); // block() handles this
+
+            elseBranch = block();
         }
 
-        // Construct and return the AST node for the IF statement.
         return new Stmt.If(condition, thenBranch, elseIfConditions, elseIfBranches, elseBranch);
     }
 
@@ -256,14 +247,11 @@ public class Parser {
     private List<Stmt> block() {
         List<Stmt> statements = new ArrayList<>();
 
-        // Keep parsing statements until the closing brace or end of file is reached.
         while (!check(TokenType.RIGHT_BRACE) && !isAtEnd()) {
-            statements.add(statement()); // Recursively parse statements inside the block.
+            statements.add(statement());
         }
-
-        // Expect a closing brace to end the block.
         consume(TokenType.RIGHT_BRACE, "Expect '}' after block.");
-        return statements; // Return the list of statements found in the block.
+        return statements;
     }
 
     private void debugPrintTokens(List<Token> tokens) {
@@ -434,9 +422,6 @@ public class Parser {
         }
 
         String message = "Expect expression.";
-        if (afterVarDeclaration) {
-            message = "You can only declare variable after the SUGOD block.";
-        }
         throw error(peek(), message);
     }
 

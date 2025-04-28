@@ -1,0 +1,90 @@
+// if statement
+SUGOD
+MUGNA NUMERO x = 3
+KUNG (x > 5)
+PUNDOK {
+    IPAKITA: "X is greater than 5"
+}
+KUNG DILI (x == 0)
+PUNDOK {
+    IPAKITA: "X is zero"
+}
+KUNG DILI (x < 0)
+PUNDOK {
+    IPAKITA: "X is negative"
+}
+KUNG WALA
+PUNDOK {
+    IPAKITA: "X is less than or equal to 5"
+}
+KATAPUSAN
+
+SUGOD
+MUGNA NUMERO score = 85
+
+KUNG (score >= 75) PUNDOK{
+    MUGNA LETRA grade = 'P' // Passed
+    KUNG (score >= 90) PUNDOK{
+        grade = 'A' // Excellent
+    } KUNG DILI (score >= 80) PUNDOK{
+        grade = 'B' // Good
+    }
+    IPAKITA: "Ang grado kay: " & grade & BAG-ONG_LINYA
+} KUNG WALA PUNDOK{
+    IPAKITA: "Wala naka-pasar." & BAG-ONG_LINYA
+}
+KATAPUSAN
+
+
+SUGOD
+MUGNA NUMERO edad=20
+MUGNA NUMERO grade=85
+
+KUNG (edad >= 18)
+PUNDOK{
+    MUGNA TINUOD isAdult="OO"
+
+    KUNG (grade >= 75)
+    PUNDOK{
+        MUGNA TINUOD passed="OO"
+        IPAKITA: "Adult: " & isAdult & $ & "Passed: " & passed
+    }
+    KUNG WALA
+    PUNDOK{
+        MUGNA TINUOD passed="DILI"
+        IPAKITA: "Adult: " & isAdult & $ & "Passed: " & passed
+    }
+}
+KUNG WALA
+PUNDOK{
+    MUGNA TINUOD isAdult="DILI"
+    IPAKITA: "Adult: " & isAdult
+}
+KATAPUSAN
+
+SUGOD
+MUGNA NUMERO edad=25
+MUGNA NUMERO score=90
+MUGNA NUMERO bonus=5
+
+KUNG (edad >= 18)
+PUNDOK{
+    MUGNA TINUOD isAdult="OO"
+
+    KUNG (score >= 85)
+    PUNDOK{
+        MUGNA TINUOD highScore="OO"
+
+        KUNG (bonus >= 5)
+        PUNDOK{
+            MUGNA TINUOD bigBonus="OO"
+            IPAKITA: "Adult: " & isAdult & $ & "High Score: " & highScore & $ & "Big Bonus: " & bigBonus
+        }
+        KUNG WALA
+        PUNDOK{
+            MUGNA TINUOD bigBonus="DILI"
+            IPAKITA: "Big Bonus: " & bigBonus
+        }
+    }
+}
+KATAPUSAN

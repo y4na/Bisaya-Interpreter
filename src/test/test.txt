@@ -1,22 +1,11 @@
 SUGOD
-MUGNA NUMERO score = 78
-MUGNA LETRA grade
+MUGNA NUMERO ctr
+MUGNA NUMERO value=10  -- declared once outside
 
-KUNG (score >= 60) PUNDOK{
-    KUNG (score >= 75) PUNDOK{
-        grade = 'P'
-        KUNG (score >= 90) PUNDOK{
-            grade = 'A'
-        } KUNG DILI (score >= 80) PUNDOK{
-            grade = 'B'
-        } KUNG DILI (score >= 75) PUNDOK{
-            grade = 'C'
-        }
-    } KUNG WALA PUNDOK{
-        grade = 'D'
-    }
-    IPAKITA: "Ang grado kay: " & grade & $
-} KUNG WALA PUNDOK{
-    IPAKITA: "Wala naka-pasar." & $
+ALANG SA (ctr=1, ctr<=3, ctr++)
+PUNDOK{
+    MUGNA NUMERO value=100  -- ERROR: redeclared 'value' inside FOR block!
+    IPAKITA: value
 }
+
 KATAPUSAN
