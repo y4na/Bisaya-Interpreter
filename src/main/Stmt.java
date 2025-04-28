@@ -8,8 +8,6 @@ abstract class Stmt {
 
         R visitExpressionStmt(Expression stmt);
 
-        R visitFunctionStmt(Function stmt);
-
         R visitIfStmt(If stmt);
 
         R visitPrintStmt(Print stmt);
@@ -52,28 +50,6 @@ abstract class Stmt {
 
         final Expr expression;
     }
-
-    static class Function extends Stmt {
-        Function(Token name, List<Parameter> params, List<Stmt> body, Token returnType) {
-            this.name = name;
-            this.params = params;
-            this.body = body;
-            this.returnType = returnType;
-        }
-
-        @Override
-        <R> R accept(Visitor<R> visitor) {
-            return visitor.visitFunctionStmt(this);
-        }
-
-        final Token name;
-        final List<Parameter> params;
-        final List<Stmt> body;
-        final Token returnType;
-
-    }
-
-
 
     static class If extends Stmt {
         If(Expr condition, List<Stmt> thenBranch, List<Expr> elseIfConditions, List<List<Stmt>> elseIfBranches,

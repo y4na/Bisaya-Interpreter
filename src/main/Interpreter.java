@@ -17,7 +17,6 @@ import main.Stmt.Bool;
 import main.Stmt.Char;
 import main.Stmt.Expression;
 import main.Stmt.Float;
-import main.Stmt.Function;
 import main.Stmt.If;
 import main.Stmt.Int;
 import main.Stmt.Print;
@@ -252,10 +251,6 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
         return null;
     }
 
-    @Override
-    public Object visitFunctionStmt(Function stmt) {
-        return null;
-    }
 
     @Override
     public Void visitPrintStmt(Print stmt) {

@@ -198,12 +198,12 @@ public class Parser {
         return new Stmt.If(condition, thenBranch, elseIfConditions, elseIfBranches, elseBranch);
     }
 
-
     private boolean checkNext(TokenType type) {
         if (current + 1 >= tokens.size()) return false;
         return tokens.get(current + 1).type == type;
     }
 
+    // this was a helper statement for the PUNDOK but wa na nako gigamit
     private List<Stmt> blockStatements() {
         List<Stmt> statements = new ArrayList<>();
         while (!isAtEnd() && !check(TokenType.END)) {
