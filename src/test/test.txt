@@ -1,6 +1,6 @@
 -- comment
 SUGOD
-MUGNA NUMERO xyz, abc=100
+MUGNA TEST xyz, abc=100
 xyz= ((abc *5)/10 + 10) * -1
 IPAKITA: [[] & xyz & []] -- this is a comment
 KATAPUSAN

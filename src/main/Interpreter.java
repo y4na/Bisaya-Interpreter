@@ -235,14 +235,14 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
     private void checkNumberOperand(Token operator, Object operand) {
         if (operand instanceof Double || operand instanceof Integer)
             return;
-        throw new RuntimeError(operator, "Operand must be an integer or a float nuimber.");
+        throw new RuntimeError(operator, "Operand must be an integer or a float number.");
     }
 
     private void checkNumberOperands(Token operator, Object left, Object right) {
         if ((left instanceof Integer && right instanceof Integer)
                 || (left instanceof Double && right instanceof Double))
             return;
-        throw new RuntimeError(operator, "Operand must be an integer or a float nuimber.");
+        throw new RuntimeError(operator, "Operand must be an integer or a float number.");
     }
 
     @Override
@@ -445,9 +445,9 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
                     parsedInput.add(newChar);
 
                 } else {
-                    if (input.get(i).equals("TRUE")) {
+                    if (input.get(i).equals("OO")) {
                         parsedInput.add(true);
-                    } else if (input.get(i).equals("FALSE")) {
+                    } else if (input.get(i).equals("DILI")) {
                         parsedInput.add(false);
                     } else {
                         parsedInput.add(input.get(i));

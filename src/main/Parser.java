@@ -198,11 +198,6 @@ public class Parser {
         return new Stmt.If(condition, thenBranch, elseIfConditions, elseIfBranches, elseBranch);
     }
 
-    private boolean checkNext(TokenType type) {
-        if (current + 1 >= tokens.size()) return false;
-        return tokens.get(current + 1).type == type;
-    }
-
     // this was a helper statement for the PUNDOK but wa na nako gigamit
     private List<Stmt> blockStatements() {
         List<Stmt> statements = new ArrayList<>();
@@ -282,11 +277,13 @@ public class Parser {
                     statements.add(new Stmt.Float(names.get(i), initializers.get(i), mutable));
                 }
                 break;
-            default:
+            case BOOL:
                 for (int i = 0; i < names.size(); i++) {
                     statements.add(new Stmt.Bool(names.get(i), initializers.get(i), mutable));
                 }
                 break;
+            default:
+                throw error(declaration, "Unsupported variable type.");
         }
 
         return statements;
@@ -452,5 +449,10 @@ public class Parser {
         if (isAtEnd())
             return false;
         return peek().type == type;
+    }
+
+    private boolean checkNext(TokenType type) {
+        if (current + 1 >= tokens.size()) return false;
+        return tokens.get(current + 1).type == type;
     }
 }
