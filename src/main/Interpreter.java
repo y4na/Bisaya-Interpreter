@@ -6,7 +6,6 @@ import java.lang.String;
 
 import main.Expr.Assign;
 import main.Expr.Binary;
-import main.Expr.Call;
 import main.Expr.Grouping;
 import main.Expr.Literal;
 import main.Expr.Logical;
@@ -155,12 +154,6 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
 
         return null;
     }
-
-    @Override
-    public Object visitCallExpr(Call expr) {
-        throw new RuntimeError(expr.paren, "Unknown function or command."); // E009
-    }
-
 
     @Override
     public Object visitGroupingExpr(Grouping expr) {

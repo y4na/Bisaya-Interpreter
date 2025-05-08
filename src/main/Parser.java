@@ -121,7 +121,7 @@ public class Parser {
     }
 
     private Stmt displayStatement() {
-        Expr value = or();
+        Expr value = expression();
         return new Stmt.Print(value);
     }
 
@@ -345,9 +345,21 @@ public class Parser {
     }
 
     private Expr term() {
+        Expr expr = addition();
+
+        while (match(TokenType.AMPERSAND)) {
+            Token operator = previous();
+            Expr right = addition();
+            expr = new Expr.Binary(expr, operator, right);
+        }
+
+        return expr;
+    }
+
+    private Expr addition() {
         Expr expr = factor();
 
-        while (match(TokenType.MINUS, TokenType.PLUS, TokenType.AMPERSAND)) {
+        while (match(TokenType.PLUS, TokenType.MINUS)) {
             Token operator = previous();
             Expr right = factor();
             expr = new Expr.Binary(expr, operator, right);
@@ -355,6 +367,7 @@ public class Parser {
 
         return expr;
     }
+
 
     private Expr factor() {
         Expr expr = unary();
@@ -374,32 +387,7 @@ public class Parser {
             return new Expr.Unary(operator, right);
         }
 
-        return call();
-    }
-
-    private Expr call() {
-        Expr expr = primary();
-
-        if (match(TokenType.LEFT_PARENTHESIS)) {
-            expr = finishCall(expr);
-        }
-
-        return expr;
-    }
-
-    private Expr finishCall(Expr callee) {
-        List<Expr> arguments = new ArrayList<>();
-        if (!check(TokenType.RIGHT_PARENTHESIS)) {
-            do {
-                if (arguments.size() >= 255) {
-                    throw error(peek(), "Can't have more than 255 arguments");
-                }
-                arguments.add(expression());
-            } while (match(TokenType.COMMA));
-        }
-
-        Token rightParen = consume(TokenType.RIGHT_PARENTHESIS, "Expecting a parenthesis after a function call.");
-        return new Expr.Call(callee, rightParen, arguments);
+        return primary();
     }
 
     private Expr primary() {

@@ -1,4 +1,3 @@
-
 SUGOD
 	MUGNA NUMERO x = 3, z
 	DAWAT: z
