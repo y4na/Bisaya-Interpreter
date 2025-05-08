@@ -1,29 +1,7 @@
+
 SUGOD
-MUGNA NUMERO student_num
-ALANG SA (student_num = 1, student_num <= 3, student_num++)
-PUNDOK{
-    MUGNA NUMERO score
-
-    KUNG (student_num == 1) PUNDOK{
-        score = 60
-    } KUNG DILI (student_num == 2) PUNDOK{
-        score = 85
-    } KUNG WALA PUNDOK{
-        score = 95
-    }
-
-    IPAKITA: "Estudyante #" & student_num & ":" & $
-    KUNG (score >= 75) PUNDOK{
-        MUGNA LETRA grade = 'P'
-        KUNG (score >= 90) PUNDOK{
-            grade = 'A'
-        } KUNG DILI (score >= 80) PUNDOK{
-            grade = 'B'
-        }
-        IPAKITA: "  Ang grado kay: " & grade & $
-    } KUNG WALA PUNDOK{
-        IPAKITA: "  Wala naka-pasar." & $
-    }
-    IPAKITA: $
-}
+	MUGNA NUMERO x = 3, z
+	DAWAT: z
+	MUGNA TINUOD t="OO"
+	IPAKITA: [-] & [&] & x + 5 & [*] & z & [']
 KATAPUSAN

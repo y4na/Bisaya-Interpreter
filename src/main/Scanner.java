@@ -103,12 +103,10 @@ public class Scanner {
             case '-':
                 if (match('-')) {
                     if (isAtLineStart() || isPrevWhitespace()) {
-                        // Treat as comment ( -- comment )
                         while (!isAtNewLine() && !isAtEnd()) {
                             advance();
                         }
                     } else {
-                        // Treat as decrement operator ( --i )
                         addToken(TokenType.MINUS_MINUS);
                     }
                 } else {

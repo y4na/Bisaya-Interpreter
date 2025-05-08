@@ -39,9 +39,11 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
             if (!hasDisplay) {
                 System.out.println("No Error.");
             }
+            if (hasDisplay) {
+                System.out.println("\nNo Error.");
+            }
         } catch (RuntimeError error) {
-            System.err.println("[Runtime Error] " + error.getMessage());
-            Main.runtimeError(error); // Optional: if you still want Main to handle something special
+            Main.runtimeError(error);
         } catch (Exception e) {
             System.err.println("An unexpected error occurred:");
             e.printStackTrace();
@@ -291,7 +293,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
                 throw new RuntimeError(stmt.name, "Value '" + v + "' is not of type Integer.");
             }
         }
-        environment.define(stmt.name.lexeme, value, TokenType.INT, stmt.mutable);
+        environment.define(stmt.name.lexeme, value, TokenType.INT);
         return null;
     }
 
@@ -308,7 +310,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
                 throw new RuntimeError(stmt.name, "Value '" + v + "' is not of type Float.");
             }
         }
-        environment.define(stmt.name.lexeme, value, TokenType.FLOAT, stmt.mutable);
+        environment.define(stmt.name.lexeme, value, TokenType.FLOAT);
         return null;
     }
 
@@ -325,7 +327,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
                 throw new RuntimeError(stmt.name, "Value '" + v + "' is not of type Character.");
             }
         }
-        environment.define(stmt.name.lexeme, value, TokenType.CHAR, stmt.mutable);
+        environment.define(stmt.name.lexeme, value, TokenType.CHAR);
         return null;
     }
 
@@ -338,7 +340,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
                 throw new RuntimeError(stmt.name, "Value '" + value + "' is not of type Boolean.");
             }
         }
-        environment.define(stmt.name.lexeme, value, TokenType.BOOL, stmt.mutable);
+        environment.define(stmt.name.lexeme, value, TokenType.BOOL);
         return null;
     }
 

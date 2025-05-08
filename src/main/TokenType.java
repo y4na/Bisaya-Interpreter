@@ -54,7 +54,6 @@ enum TokenType {
     SCAN,
     IF,
     ELSE,
-    WHILE,
     FOR,
     THE,
     AND,

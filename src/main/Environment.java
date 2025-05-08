@@ -15,7 +15,7 @@ public class Environment {
         this.enclosing = enclosing;
     }
 
-    void define(String name, Object value, TokenType type, boolean isImmutable) {
+    void define(String name, Object value, TokenType type) {
         if (values.containsKey(name)) {
             throw new RuntimeError(new Token(type, name, type, 0),
                     "Variable '" + name + "' is already defined in this scope.");
@@ -29,11 +29,7 @@ public class Environment {
             }
             current = current.enclosing;
         }
-        values.put(name, new Variable(type, value, isImmutable));
-    }
-
-    void define(String name, Object value) {
-        values.put(name, new Variable(null, value, true));
+        values.put(name, new Variable(type, value));
     }
 
     Object get(Token name) {
@@ -47,22 +43,6 @@ public class Environment {
         throw new RuntimeError(name, "Undefined variable '" + name.lexeme + "'.");
     }
 
-    TokenType getType(Token name) {
-        if (values.containsKey(name.lexeme)) {
-            return values.get(name.lexeme).getType();
-        }
-
-        throw new RuntimeError(name, "Undefined variable '" + name.lexeme + "'.");
-    }
-
-    Boolean getMutability(Token name) {
-        if (values.containsKey(name.lexeme)) {
-            return values.get(name.lexeme).isMutable();
-        }
-
-        throw new RuntimeError(name, "Undefined variable '" + name.lexeme + "'.");
-    }
-
     @SuppressWarnings("incomplete-switch")
     void assign(Token name, Object value) {
         Environment environment = this;
@@ -71,9 +51,6 @@ public class Environment {
 
                 Variable existingVar = environment.values.get(name.lexeme);
 
-                if (!existingVar.isMutable()) {
-                    throw new RuntimeError(name, "Cannot assign to immutable variable '" + name.lexeme + "'.");
-                }
 
                 TokenType expectedType = existingVar.getType();
 
@@ -103,7 +80,7 @@ public class Environment {
                                     " to variable '" + name.lexeme + "' of type " + expectedType + ".");
                 }
 
-                environment.values.put(name.lexeme, new Variable(expectedType, value, true)); // Keep mutability true
+                environment.values.put(name.lexeme, new Variable(expectedType, value));
                 return;
             }
             environment = environment.enclosing;

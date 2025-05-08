@@ -292,22 +292,22 @@ public class Parser {
         switch (token.type) {
             case CHAR:
                 for (int i = 0; i < names.size(); i++) {
-                    statements.add(new Stmt.Char(names.get(i), initializers.get(i), mutable));
+                    statements.add(new Stmt.Char(names.get(i), initializers.get(i)));
                 }
                 break;
             case INT:
                 for (int i = 0; i < names.size(); i++) {
-                    statements.add(new Stmt.Int(names.get(i), initializers.get(i), mutable));
+                    statements.add(new Stmt.Int(names.get(i), initializers.get(i)));
                 }
                 break;
             case FLOAT:
                 for (int i = 0; i < names.size(); i++) {
-                    statements.add(new Stmt.Float(names.get(i), initializers.get(i), mutable));
+                    statements.add(new Stmt.Float(names.get(i), initializers.get(i)));
                 }
                 break;
             case BOOL:
                 for (int i = 0; i < names.size(); i++) {
-                    statements.add(new Stmt.Bool(names.get(i), initializers.get(i), mutable));
+                    statements.add(new Stmt.Bool(names.get(i), initializers.get(i)));
                 }
                 break;
             default:
